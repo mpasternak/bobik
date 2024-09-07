@@ -6,8 +6,10 @@ Licencja MIT
 
 Uruchamianie:
 
+```shell
 $ export PYTHONPATH=src
 $ python -m bobik.bobik
+```
 
 Wymaga zmiennych srodowiskowych z kluczami do API Anthropic lub OpenAI...
 
