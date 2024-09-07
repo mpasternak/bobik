@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "bobik"
+version = "0.1.0"
+description = ""
+authors = ["Michał Pasternak <michal.dtz@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langchain-core = "^0.2.38"
+openai = "^1.44.0"
+langchain-openai = "^0.1.23"
+langchain-postgres = "^0.0.9"
+psycopg = "^3.2.1"
+langgraph = "^0.2.19"
+anthropic = "^0.34.2"
+langchain-anthropic = "^0.1.23"
+psycopg-pool = "^3.2.2"
+langgraph-checkpoint-postgres = "^1.0.6"
+
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.27.0"
+pillow = "^10.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
