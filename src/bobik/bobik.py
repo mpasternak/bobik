@@ -4,21 +4,21 @@ from typing import Union
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import MessagesState, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import tools_condition
 
-from bobik.prompt import get_prompt
 from bobik.tools import tool_node, tools
 
 
-def get_model(model, temperature=0.0):
+def get_model(model, model_api_key, temperature=0.0):
     if model.startswith("gpt-"):
         from langchain_openai import ChatOpenAI
 
-        llm = ChatOpenAI(model=model, temperature=temperature)
+        llm = ChatOpenAI(model=model, api_key=model_api_key, temperature=temperature)
     elif model.startswith("claude-"):
         from langchain_anthropic import ChatAnthropic
 
-        llm = ChatAnthropic(model=model, temperature=temperature)
+        llm = ChatAnthropic(model=model, api_key=model_api_key, temperature=temperature)
     else:
         raise NotImplementedError(f"Model {model} is supported by bobik")
 
@@ -26,10 +26,10 @@ def get_model(model, temperature=0.0):
     return llm_with_tools
 
 
-def get_graph_builder(model, temperature=0.0):
+def get_graph_builder(model, model_api_key, temperature=0.0) -> StateGraph:
     graph_builder = StateGraph(MessagesState)
 
-    llm_with_tools = get_model(model, temperature)
+    llm_with_tools = get_model(model, model_api_key, temperature)
 
     def chatbot(state: MessagesState):
         return {"messages": [llm_with_tools.invoke(state["messages"])]}
@@ -46,17 +46,15 @@ def get_graph_builder(model, temperature=0.0):
 class Bobik:
     def __init__(
         self,
+        system_prompt,
         thread_id=None,
-        plec_pacjenta="mezczyzna",
-        wiek_pacjenta="36",
-        tryb_zabiegu="planowy",
-        rodzaj_zabiegu="cholecystektomia",
-        email_to="admin@foobar.pl",
         db_url="memory://",
         model="claude-3-5-sonnet-20240620",
+        model_api_key=None,
         temperature=0.0,
     ):
         self.model = model
+        self.model_api_key = model_api_key
         self.temperature = temperature
 
         self.db_url = db_url
@@ -74,13 +72,9 @@ class Bobik:
 
         self.graph = self.checkpointer = None
 
-        self.plec_pacjenta = plec_pacjenta
-        self.wiek_pacjenta = wiek_pacjenta
-        self.tryb_zabiegu = tryb_zabiegu
-        self.rodzaj_zabiegu = rodzaj_zabiegu
-        self.email_to = email_to
+        self.system_prompt = system_prompt
 
-    def get_checkpointer(self):
+    def get_checkpointer(self) -> Union[PostgresSaver, MemorySaver]:
         if self.db_url.startswith("memory"):
             return MemorySaver()
 
@@ -100,16 +94,7 @@ class Bobik:
     def config(self):
         return {"configurable": {"thread_id": self.thread_id}}
 
-    def get_system_prompt(self):
-        return get_prompt(
-            plec_pacjenta=self.plec_pacjenta,
-            wiek_pacjenta=self.wiek_pacjenta,
-            tryb_zabiegu=self.tryb_zabiegu,
-            rodzaj_zabiegu=self.rodzaj_zabiegu,
-            email_to=self.email_to,
-        )
-
-    def send_message(self, msg: Union[str, None] = None):
+    def _setup(self):
         if self.checkpointer is None:
             self.checkpointer = self.get_checkpointer()
 
@@ -117,26 +102,33 @@ class Bobik:
             self.checkpointer.setup()
 
         if self.graph is None:
-            self.graph = get_graph_builder(self.model, self.temperature).compile(
-                checkpointer=self.checkpointer
-            )
+            self.graph: CompiledStateGraph = get_graph_builder(
+                self.model, self.model_api_key, self.temperature
+            ).compile(checkpointer=self.checkpointer)
+
+    def say_hello(self):
+        self._setup()
+        return self.graph.stream(
+            {"messages": [("user", self.system_prompt)]},
+            self.config,
+            stream_mode="values",
+        )
+
+    def get_messages(self):
+        self._setup()
+        return self.checkpointer.list(config=self.config)
+
+    def send_message(self, msg: Union[str, None] = None):
+
+        self._setup()
 
         if self.send_initial_prompt:
             self.send_initial_prompt = False
-            events = self.graph.stream(
-                {"messages": [("user", self.get_system_prompt())]},
-                self.config,
-                stream_mode="values",
-            )
-            for event in events:
-                yield event
-
-            # return events
+            self.say_hello()
 
         if not msg:
             return
 
-        for event in self.graph.stream(
+        return self.graph.stream(
             {"messages": [("user", msg)]}, self.config, stream_mode="values"
-        ):
-            yield event
+        )
