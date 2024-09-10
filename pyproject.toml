@@ -18,6 +18,7 @@ anthropic = "^0.34.2"
 langchain-anthropic = "^0.1.23"
 psycopg-pool = "^3.2.2"
 langgraph-checkpoint-postgres = "^1.0.6"
+click = "^8.1.7"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -27,3 +28,6 @@ pillow = "^10.4.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+"bobik" = "bobik.cli:main"

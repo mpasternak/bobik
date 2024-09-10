@@ -4,13 +4,21 @@ bobik, bot preanestetyczny
 
 Licencja MIT
 
-Uruchamianie:
+Instrukcja obsługi
+------------------
 
 ```shell
+$ poetry install
 $ export PYTHONPATH=src
-$ python -m bobik.bobik
+$ python -m bobik.cli
 ```
 
-Wymaga zmiennych srodowiskowych z kluczami do API Anthropic lub OpenAI...
+Zadziała też:
+```shell
+$ python -m bobik.cli
+```
 
-Wymaga lokalnej bazy danych PostgreSQL gdzie składa historię chat.
+Wymaga zmiennych srodowiskowych z kluczami do API Anthropic (``ANTHROPIC_API_KEY``) lub 
+OpenAI (``OPENAI_API_KEY``)...
+
+Opcjnalnie wymaga bazy danych PostgreSQL, gdzie może zapisywać historię chat. 

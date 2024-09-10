@@ -7,7 +7,7 @@ def send_email(subject: str, body_text: str, recipients: str):
     """Call to send an e-mail with the log"""
 
     print(f"send_email called, {subject=} {body_text=} {recipients=}")
-    return "E-mail sent"
+    return "Wysłałem e-mail do administratora serwisu. "
 
 
 tools = [send_email]
