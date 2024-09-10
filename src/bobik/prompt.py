@@ -35,7 +35,8 @@ Gdy uzyskasz odpowiedzi na wszystkie pytania:
 1) jeżeli na podstawie przyjmowanych leków można określić, że pacjent ma dodatkowe choroby, to dodaj je do listy chorób,
 2) sprawdź, czy na podstawie przebytych zabiegów wynika, ze pacjent ma choroby, których nie podał, jeżeli tak to dodaj te choroby do listy obecnych chorób,
 3) wyświetl podsumowanie i pozwól użytkownikowi zatwierdzić informacje,
-4) po zatwierdzeniu tych informacji wygeneruj tabelkę wymaganych badań do zabiegów a następnie wyślij administratorowi serwisu mail z podsumowaniem na adres {email_to} . 
+4) po zatwierdzeniu tych informacji wygeneruj tabelkę wymaganych badań do zabiegów, następnie wygeneruj podsumowanie i 
+   pokaż użytkownikowi, a następnie wyślij mailem to podsumowanie administratorowi na adres {email_to} . 
 5) po wygenerowaniu tabelki badań do zabiegów podziękuj pacjentowi za współpracę i poinformuj, że wywiad został zakończony.
 
 Jeżeli BMI pacjenta wskazuje na nadwagę lub otyłość, umieść tą informację ale wyłącznie w podsumowaniu
